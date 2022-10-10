@@ -1,26 +1,33 @@
-import { useEffect, useRef } from 'react';
+const sgMail = require("@sendgrid/mail")
+const fs = require("fs")
+SENDGRID_KEY="your key"
+EMAIL_FROM="avinash@myclavis.ca"
+sgMail.setApiKey(SENDGRID_KEY);
+//you can use any sampple document to send this email
+let attachments = fs.readFileSync(`${__dirname}/note.pdf`).toString("base64")
 
-export default function HomePage() {
-  const viewer = useRef(null);
-
-  useEffect(() => {
-    import('@pdftron/webviewer').then(() => {
-      WebViewer(
-        {
-          path: '/webviewer/lib',
-          initialDoc: '/files/sample.pdf',
-        },
-        viewer.current
-      ).then((instance) => {
-        const { docViewer } = instance;
-        // you can now call WebViewer APIs here...
-      });
-    });
-  }, []);
-
-  return (
-    <div className='MyComponent'>
-      <div className='webviewer' ref={viewer} style={{ height: '100vh' }}></div>
-    </div>
-  );
+const sendEmail = () => {
+    const msgConfig = {
+        to: "avinashpathrol1@gmail.com",
+        from: EMAIL_FROM,
+        subject: "Sendgrind test mail",
+        text: "This is a test mail from nodejs using sendgrid",
+        attachments: [
+            {
+                content: attachments,
+                filename:"note.pdf",
+                type: "application/pdf",
+                disposition: "attachment",
+            }
+        ]
+    }
+ sgMail.send(msgConfig)
+    .then((res) => {
+        console.log("Email Sent to: ", msgConfig.to)
+})
+    .catch((err) => {
+        console.log(err)
+    })
 }
+
+sendEmail()
